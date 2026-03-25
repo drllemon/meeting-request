@@ -494,28 +494,29 @@
   // Handle Formspree AJAX submission
   const form = document.getElementById('meeting-form');
   form.addEventListener('submit', async function(e) {
-    const action = form.getAttribute('action');
-    if (action.includes('YOUR_FORM_ID')) return; // fall through to native submit
     e.preventDefault();
-    const data = new FormData(form);
     const btn = form.querySelector('.submit-btn');
     btn.textContent = 'Sending…';
     btn.disabled = true;
+    const data = new FormData(form);
+    const params = new URLSearchParams();
+    for (const [key, value] of data.entries()) {
+      params.append(key, value);
+    }
     try {
-      const res = await fetch(action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } });
-      if (res.ok) {
-        form.style.display = 'none';
-        document.getElementById('setup-banner').style.display = 'none';
-        document.getElementById('success-msg').style.display = 'block';
-      } else {
-        btn.textContent = 'Submit Meeting Request →';
-        btn.disabled = false;
-        alert('Something went wrong. Please try again.');
-      }
+      await fetch(form.getAttribute('action'), {
+        method: 'POST',
+        mode: 'no-cors',
+        body: params
+      });
+      form.style.display = 'none';
+      document.getElementById('setup-banner') &&
+        (document.getElementById('setup-banner').style.display = 'none');
+      document.getElementById('success-msg').style.display = 'block';
     } catch {
       btn.textContent = 'Submit Meeting Request →';
       btn.disabled = false;
-      alert('Network error. Please try again.');
+      alert('Something went wrong. Please try again.')
     }
   });
 </script>
