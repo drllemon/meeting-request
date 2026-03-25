@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Request a Meeting</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f0f2f7;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px 60px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+      max-width: 680px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2d4fa1 0%, #1a337d 100%);
+      padding: 36px 40px 32px;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      line-height: 1.5;
+    }
+
+    .form-body {
+      padding: 36px 40px 40px;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #2d4fa1;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e8edf8;
+    }
+
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 16px;
+    }
+
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    label .req {
+      color: #e05252;
+      margin-left: 2px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    input[type="time"],
+    textarea,
+    select {
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      padding: 10px 13px;
+      font-size: 0.93rem;
+      font-family: inherit;
+      color: #111827;
+      background: #fafafa;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      width: 100%;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #2d4fa1;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(45, 79, 161, 0.12);
+    }
+
+    textarea { resize: vertical; min-height: 90px; }
+
+    /* Location preference */
+    .location-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .loc-option input[type="radio"] { display: none; }
+
+    .loc-option label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 10px;
+      border: 2px solid #d1d5db;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #6b7280;
+      background: #fafafa;
+      transition: all 0.15s;
+      margin-bottom: 0;
+    }
+
+    .loc-option label .icon {
+      font-size: 1.5rem;
+    }
+
+    .loc-option input[type="radio"]:checked + label {
+      border-color: #2d4fa1;
+      background: #eef2fb;
+      color: #2d4fa1;
+    }
+
+    .loc-option label:hover {
+      border-color: #93a8d9;
+      background: #f5f7fd;
+    }
+
+    /* Availability slots */
+    .slots-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .slot-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+      background: #f8f9fc;
+      border: 1.5px solid #e5e9f2;
+      border-radius: 10px;
+      padding: 14px;
+      position: relative;
+    }
+
+    .slot-row .field { margin-bottom: 0; }
+
+    .slot-row label {
+      font-size: 0.78rem;
+      color: #6b7280;
+      font-weight: 600;
+    }
+
+    .remove-slot {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 8px 6px;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+      align-self: flex-end;
+      margin-bottom: 0;
+      line-height: 1;
+    }
+
+    .remove-slot:hover { color: #e05252; background: #fef2f2; }
+
+    .add-slot-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: 2px dashed #93a8d9;
+      color: #2d4fa1;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      justify-content: center;
+      margin-top: 4px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .add-slot-btn:hover { background: #eef2fb; border-color: #2d4fa1; }
+
+    .slot-number {
+      position: absolute;
+      top: -9px;
+      left: 12px;
+      background: #2d4fa1;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* Submit */
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #2d4fa1 0%, #1a337d 100%);
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      transition: opacity 0.15s, transform 0.1s;
+      margin-top: 8px;
+    }
+
+    .submit-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .submit-btn:active { transform: translateY(0); opacity: 1; }
+
+    .note {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      text-align: center;
+      margin-top: 14px;
+      line-height: 1.5;
+    }
+
+    /* Success message */
+    #success-msg {
+      display: none;
+      background: #f0fdf4;
+      border: 2px solid #86efac;
+      border-radius: 12px;
+      padding: 28px 32px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #success-msg .check { font-size: 2.5rem; margin-bottom: 12px; }
+    #success-msg h3 { color: #166534; font-size: 1.1rem; margin-bottom: 6px; }
+    #success-msg p { color: #4b7c60; font-size: 0.9rem; }
+
+    /* Setup banner */
+    .setup-banner {
+      background: #fffbeb;
+      border: 1.5px solid #fcd34d;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 28px;
+      font-size: 0.83rem;
+      color: #92400e;
+      line-height: 1.55;
+    }
+
+    .setup-banner strong { color: #78350f; }
+    .setup-banner code {
+      background: #fef3c7;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    @media (max-width: 540px) {
+      .form-body, .header { padding-left: 20px; padding-right: 20px; }
+      .row { grid-template-columns: 1fr; }
+      .location-options { grid-template-columns: 1fr; }
+      .slot-row { grid-template-columns: 1fr 1fr; }
+      .slot-row .field:first-child { grid-column: span 2; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <h1>Request a Meeting</h1>
+    <p>Fill out the form below with your availability and preferences.<br>
+    You'll hear back via email once a time has been confirmed.</p>
+  </div>
+
+  <div class="form-body">
+
+    <!-- ⚠️ SETUP NOTICE — remove this banner once Formspree is configured -->
+
+    <!-- CHANGE "YOUR_FORM_ID" to your Formspree form ID -->
+    <form id="meeting-form" action="https://formspree.io/f/xjgpbkbd" method="POST">
+
+      <!-- About You -->
+      <div class="section">
+        <div class="section-label">About You</div>
+        <div class="row">
+          <div class="field">
+            <label for="name">Full Name <span class="req">*</span></label>
+            <input type="text" id="name" name="name" placeholder="Jane Smith" required />
+          </div>
+          <div class="field">
+            <label for="email">Email Address <span class="req">*</span></label>
+            <input type="email" id="email" name="email" placeholder="jane@university.edu" required />
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="program">Program / Year</label>
+            <input type="text" id="program" name="program" placeholder="e.g. PhD Year 2, Psychology" />
+          </div>
+          <div class="field">
+            <label for="duration">Estimated Meeting Length <span class="req">*</span></label>
+            <select id="duration" name="duration" required>
+              <option value="" disabled selected>Select a duration</option>
+              <option value="15 minutes">15 minutes</option>
+              <option value="30 minutes">30 minutes</option>
+              <option value="45 minutes">45 minutes</option>
+              <option value="1 hour">1 hour</option>
+              <option value="1.5 hours">1.5 hours</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meeting Purpose -->
+      <div class="section">
+        <div class="section-label">Purpose of Meeting</div>
+        <div class="field">
+          <label for="topic">Topic / Reason for Meeting <span class="req">*</span></label>
+          <textarea id="topic" name="topic" placeholder="Briefly describe what you'd like to discuss…" required></textarea>
+        </div>
+      </div>
+
+      <!-- Location Preference -->
+      <div class="section">
+        <div class="section-label">Location Preference</div>
+        <div class="location-options">
+          <div class="loc-option">
+            <input type="radio" name="location" id="loc-inperson" value="In-person" />
+            <label for="loc-inperson">
+              <span class="icon">🏛️</span>
+              In-Person
+            </label>
+          </div>
+          <div class="loc-option">
+            <input type="radio" name="location" id="loc-zoom" value="Zoom" />
+            <label for="loc-zoom">
+              <span class="icon">💻</span>
+              Zoom
+            </label>
+          </div>
+          <div class="loc-option">
+            <input type="radio" name="location" id="loc-nopref" value="No preference" checked />
+            <label for="loc-nopref">
+              <span class="icon">🤝</span>
+              No Preference
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Availability -->
+      <div class="section">
+        <div class="section-label">Your Availability</div>
+        <div class="slots-container" id="slots-container">
+          <!-- First slot (not removable) -->
+          <div class="slot-row" id="slot-1">
+            <span class="slot-number">Option 1</span>
+            <div class="field">
+              <label>Date <span class="req">*</span></label>
+              <input type="date" name="slot_1_date" required />
+            </div>
+            <div class="field">
+              <label>From</label>
+              <input type="time" name="slot_1_from" />
+            </div>
+            <div class="field">
+              <label>To</label>
+              <input type="time" name="slot_1_to" />
+            </div>
+            <div></div><!-- empty for grid alignment -->
+          </div>
+        </div>
+        <button type="button" class="add-slot-btn" id="add-slot-btn" onclick="addSlot()">
+          + Add Another Time Option
+        </button>
+      </div>
+
+      <!-- Additional Notes -->
+      <div class="section">
+        <div class="section-label">Additional Notes</div>
+        <div class="field">
+          <label for="notes">Anything else I should know?</label>
+          <textarea id="notes" name="notes" placeholder="Optional — any context, constraints, or questions…" style="min-height:70px;"></textarea>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">Submit Meeting Request →</button>
+      <p class="note">Your request will be reviewed and you'll receive a confirmation email<br>once a time has been accepted.</p>
+
+    </form>
+
+    <div id="success-msg">
+      <div class="check">✅</div>
+      <h3>Request Submitted!</h3>
+      <p>Thanks — your meeting request has been sent.<br>You'll receive a confirmation email once a time is confirmed.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let slotCount = 1;
+
+  function addSlot() {
+    slotCount++;
+    const container = document.getElementById('slots-container');
+    const div = document.createElement('div');
+    div.className = 'slot-row';
+    div.id = `slot-${slotCount}`;
+    div.innerHTML = `
+      <span class="slot-number">Option ${slotCount}</span>
+      <div class="field">
+        <label>Date</label>
+        <input type="date" name="slot_${slotCount}_date" />
+      </div>
+      <div class="field">
+        <label>From</label>
+        <input type="time" name="slot_${slotCount}_from" />
+      </div>
+      <div class="field">
+        <label>To</label>
+        <input type="time" name="slot_${slotCount}_to" />
+      </div>
+      <button type="button" class="remove-slot" title="Remove this option" onclick="removeSlot(${slotCount})">✕</button>
+    `;
+    container.appendChild(div);
+    div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function removeSlot(id) {
+    const el = document.getElementById(`slot-${id}`);
+    if (el) {
+      el.style.opacity = '0';
+      el.style.transform = 'scale(0.97)';
+      el.style.transition = 'opacity 0.15s, transform 0.15s';
+      setTimeout(() => { el.remove(); renumberSlots(); }, 150);
+    }
+  }
+
+  function renumberSlots() {
+    const slots = document.querySelectorAll('.slot-row');
+    slots.forEach((slot, i) => {
+      const label = slot.querySelector('.slot-number');
+      if (label) label.textContent = `Option ${i + 1}`;
+    });
+  }
+
+  // Handle Formspree AJAX submission
+  const form = document.getElementById('meeting-form');
+  form.addEventListener('submit', async function(e) {
+    const action = form.getAttribute('action');
+    if (action.includes('YOUR_FORM_ID')) return; // fall through to native submit
+    e.preventDefault();
+    const data = new FormData(form);
+    const btn = form.querySelector('.submit-btn');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    try {
+      const res = await fetch(action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        form.style.display = 'none';
+        document.getElementById('setup-banner').style.display = 'none';
+        document.getElementById('success-msg').style.display = 'block';
+      } else {
+        btn.textContent = 'Submit Meeting Request →';
+        btn.disabled = false;
+        alert('Something went wrong. Please try again.');
+      }
+    } catch {
+      btn.textContent = 'Submit Meeting Request →';
+      btn.disabled = false;
+      alert('Network error. Please try again.');
+    }
+  });
+</script>
+
+</body>
+</html>
